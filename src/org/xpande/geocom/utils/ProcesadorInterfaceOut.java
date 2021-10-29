@@ -1,15 +1,14 @@
 package org.xpande.geocom.utils;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.compiere.model.I_C_BPartner;
-import org.compiere.model.I_M_Product;
-import org.compiere.model.MProduct;
-import org.compiere.model.Query;
+import org.compiere.model.*;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
 import org.xpande.core.utils.FileUtils;
+import org.xpande.core.utils.PriceListUtils;
 import org.xpande.geocom.model.I_Z_GeocomInterfaceOut;
 import org.xpande.geocom.model.MZGCInterfaceOut;
 import org.xpande.geocom.model.MZGeocomInterfaceOut;
@@ -19,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -114,9 +114,30 @@ public class ProcesadorInterfaceOut {
                 gcOut.setM_Product_ID(interfaceOut.getRecord_ID());
                 gcOut.setCodImpuestoPOS("IVA");
                 gcOut.setISO_Code("UYU");
-                gcOut.setPrice(interfaceOut.getPriceSO());
                 gcOut.setTipoDatoInterface("P");
                 gcOut.setDateTrx(fechaHoy);
+
+                // Me aseguro que para Geocom, siempre vaya el precio de venta
+                BigDecimal priceSO = Env.ZERO;
+                if ((interfaceOut.getPriceSO() != null) && (interfaceOut.getPriceSO().compareTo(Env.ZERO) > 0)){
+                    priceSO = interfaceOut.getPriceSO();
+                }
+                else{
+                    MPriceList priceList = null;
+                    if (interfaceOut.getM_PriceList_ID() > 0){
+                        priceList = (MPriceList) interfaceOut.getM_PriceList();
+                    }
+                    else{
+                        priceList = PriceListUtils.getPriceListByOrg(ctx, interfaceOut.getAD_Client_ID(), interfaceOut.getAD_OrgTrx_ID(),
+                                142, true, true, null);
+                    }
+                    MPriceListVersion plVersion = priceList.getPriceListVersion(null);
+                    MProductPrice productPrice = MProductPrice.get(ctx, plVersion.get_ID(), interfaceOut.getRecord_ID(), null);
+                    if (productPrice != null){
+                        priceSO = productPrice.getPriceStd();
+                    }
+                }
+                gcOut.setPrice(priceSO);
                 gcOut.saveEx();
             }
 
