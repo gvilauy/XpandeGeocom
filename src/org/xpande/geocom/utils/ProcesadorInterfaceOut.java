@@ -112,7 +112,11 @@ public class ProcesadorInterfaceOut {
                 gcOut.setAD_Org_ID(interfaceOut.getAD_OrgTrx_ID());
                 gcOut.setCRUDType(interfaceOut.getCRUDType());
                 gcOut.setM_Product_ID(interfaceOut.getRecord_ID());
-                gcOut.setCodImpuestoPOS("IVA");
+
+                MProduct product = (MProduct) gcOut.getM_Product();
+                MTaxCategory taxCategory = (MTaxCategory) product.getC_TaxCategory();
+                gcOut.setCodImpuestoPOS(taxCategory.getCommodityCode());
+
                 gcOut.setISO_Code("UYU");
                 gcOut.setTipoDatoInterface("P");
                 gcOut.setDateTrx(fechaHoy);
@@ -139,6 +143,12 @@ public class ProcesadorInterfaceOut {
                 }
                 gcOut.setPrice(priceSO);
                 gcOut.saveEx();
+
+                interfaceOut.set_ValueOfColumn("Z_GCInterfaceOut_ID", gcOut.get_ID());
+                if (zComunicacionPosID > 0){
+                    interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                }
+                interfaceOut.saveEx();
             }
 
             // Obtengo y recorro lineas de interface de codigos de barra, segun si es proceso o reproceso de interface
@@ -155,14 +165,24 @@ public class ProcesadorInterfaceOut {
                 MZGCInterfaceOut gcOut = new MZGCInterfaceOut(this.ctx, 0, this.trxName);
                 gcOut.setAD_Org_ID(interfaceOut.getAD_OrgTrx_ID());
                 gcOut.setCRUDType(interfaceOut.getCRUDType());
-                gcOut.setM_Product_ID(interfaceOut.getRecord_ID());
-                gcOut.setCodImpuestoPOS("IVA");
+                gcOut.setM_Product_ID(productoUPC.getM_Product_ID());
+
+                MProduct product = (MProduct) gcOut.getM_Product();
+                MTaxCategory taxCategory = (MTaxCategory) product.getC_TaxCategory();
+                gcOut.setCodImpuestoPOS(taxCategory.getCommodityCode());
+
                 gcOut.setISO_Code("UYU");
                 gcOut.setPrice(interfaceOut.getPriceSO());
                 gcOut.setTipoDatoInterface("B");
                 gcOut.setDateTrx(fechaHoy);
                 gcOut.setUPC(productoUPC.getUPC());
                 gcOut.saveEx();
+
+                interfaceOut.set_ValueOfColumn("Z_GCInterfaceOut_ID", gcOut.get_ID());
+                if (zComunicacionPosID > 0){
+                    interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                }
+                interfaceOut.saveEx();
             }
         }
         catch (Exception e){
@@ -255,6 +275,12 @@ public class ProcesadorInterfaceOut {
                 gcOut.setTipoDatoInterface("C");
                 gcOut.setDateTrx(fechaHoy);
                 gcOut.saveEx();
+
+                interfaceOut.set_ValueOfColumn("Z_GCInterfaceOut_ID", gcOut.get_ID());
+                if (zComunicacionPosID > 0){
+                    interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                }
+                interfaceOut.saveEx();
             }
 
         }
@@ -262,7 +288,6 @@ public class ProcesadorInterfaceOut {
             throw new AdempiereException(e);
         }
         return message;
-
     }
 
     /***

@@ -2,6 +2,7 @@ package org.xpande.geocom.model;
 
 import org.compiere.model.*;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
 
@@ -284,6 +285,15 @@ public class ValidatorGeocom implements ModelValidator {
         // Retail. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
 
+            // Si no cambió el precio de lista no hago nada (puede que solo haya cambiado la fecha de vigencia)
+            if (!model.is_ValueChanged(MProductPrice.COLUMNNAME_PriceList)){
+                return null;
+            }
+            // Si el precio de lista es CERO no hago nada
+            if ((model.getPriceList() == null) || (model.getPriceList().compareTo(Env.ZERO) <= 0)){
+                return null;
+            }
+
             // Solo listas de ventas con organización distinto de *
             MPriceListVersion priceListVersion = new MPriceListVersion(model.getCtx(), model.getM_PriceList_Version_ID(), model.get_TrxName());
             MPriceList priceList = priceListVersion.getPriceList();
@@ -340,7 +350,6 @@ public class ValidatorGeocom implements ModelValidator {
             geocomInterfaceOut.setM_PriceList_ID(priceList.get_ID());
             geocomInterfaceOut.saveEx();
         }
-
         return null;
     }
 
