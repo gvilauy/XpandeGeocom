@@ -9,10 +9,7 @@ import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
 import org.xpande.core.utils.FileUtils;
 import org.xpande.core.utils.PriceListUtils;
-import org.xpande.geocom.model.I_Z_GeocomInterfaceOut;
-import org.xpande.geocom.model.MZGCInterfaceOut;
-import org.xpande.geocom.model.MZGeocomInterfaceOut;
-import org.xpande.geocom.model.X_Z_GeocomInterfaceOut;
+import org.xpande.geocom.model.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -145,10 +142,22 @@ public class ProcesadorInterfaceOut {
                 gcOut.saveEx();
 
                 interfaceOut.set_ValueOfColumn("Z_GCInterfaceOut_ID", gcOut.get_ID());
+                interfaceOut.setIsExecuted(true);
                 if (zComunicacionPosID > 0){
-                    interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    if (interfaceOut.getZ_ComunicacionPOS_ID() <= 0){
+                        interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    }
                 }
                 interfaceOut.saveEx();
+
+                // Marco el producto como creado en POS si es que ya no esta ahí
+                MZGCProdOrgPos prodOrgPos = MZGCProdOrgPos.getByProdOrg(ctx, gcOut.getM_Product_ID(), gcOut.getAD_Org_ID(), trxName);
+                if ((prodOrgPos == null) || (prodOrgPos.get_ID() <= 0)){
+                    prodOrgPos = new MZGCProdOrgPos(ctx, 0, trxName);
+                    prodOrgPos.setAD_Org_ID(gcOut.getAD_Org_ID());
+                    prodOrgPos.setM_Product_ID(gcOut.getM_Product_ID());
+                    prodOrgPos.saveEx();
+                }
             }
 
             // Obtengo y recorro lineas de interface de codigos de barra, segun si es proceso o reproceso de interface
@@ -161,7 +170,15 @@ public class ProcesadorInterfaceOut {
                 interfaceOuts = this.getLinesUPCByComPos(adOrgID, zComunicacionPosID);
             }
             for (MZGeocomInterfaceOut interfaceOut: interfaceOuts){
+
                 MZProductoUPC productoUPC = new MZProductoUPC(this.ctx, interfaceOut.getRecord_ID(), this.trxName);
+
+                // Si el producto asociado a esta barra NO esta creado en el POS, no comunico la barra.
+                MZGCProdOrgPos prodOrgPos = MZGCProdOrgPos.getByProdOrg(ctx, productoUPC.getM_Product_ID(), interfaceOut.getAD_OrgTrx_ID(), trxName);
+                if ((prodOrgPos == null) || (prodOrgPos.get_ID() <= 0)){
+                    continue;
+                }
+
                 MZGCInterfaceOut gcOut = new MZGCInterfaceOut(this.ctx, 0, this.trxName);
                 gcOut.setAD_Org_ID(interfaceOut.getAD_OrgTrx_ID());
                 gcOut.setCRUDType(interfaceOut.getCRUDType());
@@ -179,8 +196,11 @@ public class ProcesadorInterfaceOut {
                 gcOut.saveEx();
 
                 interfaceOut.set_ValueOfColumn("Z_GCInterfaceOut_ID", gcOut.get_ID());
+                interfaceOut.setIsExecuted(true);
                 if (zComunicacionPosID > 0){
-                    interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    if (interfaceOut.getZ_ComunicacionPOS_ID() <= 0){
+                        interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    }
                 }
                 interfaceOut.saveEx();
             }
@@ -277,12 +297,14 @@ public class ProcesadorInterfaceOut {
                 gcOut.saveEx();
 
                 interfaceOut.set_ValueOfColumn("Z_GCInterfaceOut_ID", gcOut.get_ID());
+                interfaceOut.setIsExecuted(true);
                 if (zComunicacionPosID > 0){
-                    interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    if (interfaceOut.getZ_ComunicacionPOS_ID() <= 0){
+                        interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    }
                 }
                 interfaceOut.saveEx();
             }
-
         }
         catch (Exception e){
             throw new AdempiereException(e);

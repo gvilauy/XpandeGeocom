@@ -71,31 +71,9 @@ public class ReadCreditSales extends SvrProcess {
         ResultSet rs = null;
 
         try{
-            // Producto a considerar en los documentos de venta
-            if (this.geocomConfig.getProdVtasCredPOS_ID() <= 0){
-                return;
-            }
-
             Date dateFechaAux = new Date(this.dateTrx.getTime());
             dateFechaAux =  DateUtils.addDays(dateFechaAux, 1);
             Timestamp dateTo2 = new Timestamp(dateFechaAux.getTime());
-
-            MProduct product = new MProduct(getCtx(), this.geocomConfig .getProdVtasCredPOS_ID(), null);
-            if ((product == null) || (product.get_ID() <= 0)){
-                return;
-            }
-
-            // Impuesto asociado al producto
-            MTaxCategory taxCategory = (MTaxCategory) product.getC_TaxCategory();
-            if ((taxCategory == null) || (taxCategory.get_ID() <= 0)){
-                return;
-            }
-
-            // Obtengo impuesto asociado al producto para este tipo de documentos
-            MTax taxProduct = taxCategory.getDefaultTax();
-            if ((taxProduct == null) || (taxProduct.get_ID() <= 0)){
-                return;
-            }
 
             sql = " select a.z_gc_interfacevta_id, a.fechaticket, a.nroticket, coalesce(a.c_bpartner_id, b.c_bpartner_id) as c_bpartner_id, " +
                     " a.tipocfe, a.numerocfe, a.seriecfe, " +
@@ -114,6 +92,36 @@ public class ReadCreditSales extends SvrProcess {
             rs = pstmt.executeQuery();
 
             while(rs.next()){
+
+                // Obtengo medio de pago pos
+                sql = " select max(a.codmediopago) as codmediopago from z_gc_interfacevtapago a " +
+                        " inner join z_mediopagopos mpos on (a.codmediopago = mpos.codmediopagopos and mpos.z_posvendor_id = 1000000) " +
+                        " inner join z_mediopago mp on mp.z_mediopago_id = mpos.z_mediopago_id " +
+                        " where z_gc_interfacevta_id =" + rs.getInt("z_gc_interfacevta_id") +
+                        " and mp.isventacredito ='Y' ";
+                String codMediPagoAux = DB.getSQLValueStringEx(get_TrxName(), sql);
+
+                // Obtengo producto asociado al medio de pago
+                sql = " select max(m_product_id) as m_product_id from Z_MedioPago_Acct where z_mediopago_id in " +
+                        " (select z_mediopago_id from z_mediopagopos where codmediopagopos='" + codMediPagoAux + "' and z_posvendor_id = 1000000) ";
+                int mProductIDAux = DB.getSQLValueEx(get_TrxName(), sql);
+                if (mProductIDAux <= 0){
+                    return;
+                }
+                MProduct product = new MProduct(getCtx(), mProductIDAux, get_TrxName());
+                if ((product == null) || (product.get_ID() <= 0)){
+                    return;
+                }
+                // Impuesto asociado al producto
+                MTaxCategory taxCategory = (MTaxCategory) product.getC_TaxCategory();
+                if ((taxCategory == null) || (taxCategory.get_ID() <= 0)){
+                    return;
+                }
+                // Obtengo impuesto asociado al producto para este tipo de documentos
+                MTax taxProduct = taxCategory.getDefaultTax();
+                if ((taxProduct == null) || (taxProduct.get_ID() <= 0)){
+                    return;
+                }
 
                 int cCurrencyID = 142;
                 if ((!rs.getString("iso_code").equalsIgnoreCase("858")) && (!rs.getString("iso_code").equalsIgnoreCase("UYU"))){
@@ -309,7 +317,8 @@ public class ReadCreditSales extends SvrProcess {
                 vtaCtaCte.setC_BP_Group_ID(partner.getC_BP_Group_ID());
                 vtaCtaCte.saveEx();
 
-                String action = " update z_gc_interfacevta set iscreditreaded ='Y' where z_gc_interfacevta_id =" + vtaCtaCte.getZ_GC_VtaCtaCte_ID();
+                String action = " update z_gc_interfacevta set iscreditreaded ='Y' " +
+                        " where z_gc_interfacevta_id =" + vtaCtaCte.getZ_GC_InterfaceVta_ID();
                 DB.executeUpdateEx(action, get_TrxName());
             }
         }
@@ -454,7 +463,7 @@ public class ReadCreditSales extends SvrProcess {
                 vtaCtaCte.setC_BP_Group_ID(partner.getC_BP_Group_ID());
                 vtaCtaCte.saveEx();
 
-                String action = " update z_gc_interfacevta set istaxreaded ='Y' where z_gc_interfacevta_id =" + vtaCtaCte.getZ_GC_VtaCtaCte_ID();
+                String action = " update z_gc_interfacevta set istaxreaded ='Y' where z_gc_interfacevta_id =" + vtaCtaCte.getZ_GC_InterfaceVta_ID();
                 DB.executeUpdateEx(action, get_TrxName());
             }
         }
