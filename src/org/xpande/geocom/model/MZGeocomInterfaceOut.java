@@ -73,7 +73,5 @@ public class MZGeocomInterfaceOut extends X_Z_GeocomInterfaceOut {
         MZGeocomInterfaceOut model = new Query(ctx, MZGeocomInterfaceOut.Table_Name, whereClause, trxName).first();
 
         return model;
-
     }
-
 }

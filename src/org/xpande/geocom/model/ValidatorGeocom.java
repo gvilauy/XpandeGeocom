@@ -76,7 +76,7 @@ public class ValidatorGeocom implements ModelValidator {
      */
     public String modelChange(MProduct model, int type) throws Exception {
 
-        int adOrgID = 1000000;
+        int adOrgID = 1000001;
 
         // Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -94,7 +94,8 @@ public class ValidatorGeocom implements ModelValidator {
                 geocomInterfaceOut.setSeqNo(10);
                 geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                 geocomInterfaceOut.setRecord_ID(model.get_ID());
-                geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                geocomInterfaceOut.setAD_Org_ID(1000001);
+                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                 geocomInterfaceOut.saveEx();
             }
             else if (type == ModelValidator.TYPE_AFTER_CHANGE){
@@ -135,7 +136,8 @@ public class ValidatorGeocom implements ModelValidator {
                                 geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                                 geocomInterfaceOut.setSeqNo(10);
                                 geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                                geocomInterfaceOut.setAD_Org_ID(1000001);
+                                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                                 geocomInterfaceOut.saveEx();
                             }
                         }
@@ -165,7 +167,8 @@ public class ValidatorGeocom implements ModelValidator {
                                     geocomInterfaceOut.setSeqNo(10);
                                     geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                                     geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                    geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                                    geocomInterfaceOut.setAD_Org_ID(1000001);
+                                    geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                                     geocomInterfaceOut.saveEx();
                                 }
                             }
@@ -199,7 +202,8 @@ public class ValidatorGeocom implements ModelValidator {
                         geocomInterfaceOut.setSeqNo(20);
                         geocomInterfaceOut.setRecord_ID(model.get_ID());
                         geocomInterfaceOut.setIsPriceChanged(false);
-                        geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                        geocomInterfaceOut.setAD_Org_ID(1000001);
+                        geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                         geocomInterfaceOut.saveEx();
                     }
 
@@ -232,7 +236,7 @@ public class ValidatorGeocom implements ModelValidator {
     public String modelChange(MZProductoUPC model, int type) throws Exception {
 
         MProduct product = (MProduct)model.getM_Product();
-        int adOrgID = 1000000;
+        int adOrgID = 1000001;
 
         // Si el producto no se vende o no esta activo, no hago nada
         if ((!product.isSold()) || (!product.isActive())){
@@ -249,7 +253,8 @@ public class ValidatorGeocom implements ModelValidator {
             geocomInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
             geocomInterfaceOut.setRecord_ID(model.get_ID());
             geocomInterfaceOut.setSeqNo(15);
-            geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+            geocomInterfaceOut.setAD_Org_ID(1000001);
+            geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
             geocomInterfaceOut.saveEx();
 
         }
@@ -263,7 +268,8 @@ public class ValidatorGeocom implements ModelValidator {
                 geocomInterfaceOut.setRecord_ID(model.get_ID());
                 geocomInterfaceOut.setDescription(model.getUPC().trim());
                 geocomInterfaceOut.setSeqNo(13);
-                geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                geocomInterfaceOut.setAD_Org_ID(1000001);
+                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                 geocomInterfaceOut.saveEx();
             }
         }
@@ -280,7 +286,7 @@ public class ValidatorGeocom implements ModelValidator {
      */
     public String modelChange(MProductPrice model, int type) throws Exception {
 
-        int adOrgID = 1000000;
+        int adOrgID = 1000001;
 
         // Retail. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -342,7 +348,8 @@ public class ValidatorGeocom implements ModelValidator {
                 geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_UPDATE);
                 geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                 geocomInterfaceOut.setRecord_ID(product.get_ID());
-                geocomInterfaceOut.setAD_OrgTrx_ID(priceList.getAD_Org_ID());
+                geocomInterfaceOut.setAD_Org_ID(1000001);
+                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                 geocomInterfaceOut.setSeqNo(30);
             }
 
@@ -363,7 +370,7 @@ public class ValidatorGeocom implements ModelValidator {
      */
     public String modelChange(MBPartner model, int type) throws Exception {
 
-        int adOrgID = 1000000;
+        int adOrgID = 1000001;
 
         // Geocom. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -381,7 +388,8 @@ public class ValidatorGeocom implements ModelValidator {
                 geocomInterfaceOut.setSeqNo(10);
                 geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
                 geocomInterfaceOut.setRecord_ID(model.get_ID());
-                geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                geocomInterfaceOut.setAD_Org_ID(1000001);
+                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                 geocomInterfaceOut.saveEx();
             }
             else if (type == ModelValidator.TYPE_AFTER_CHANGE){
@@ -418,7 +426,8 @@ public class ValidatorGeocom implements ModelValidator {
                                 geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
                                 geocomInterfaceOut.setSeqNo(30);
                                 geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                                geocomInterfaceOut.setAD_Org_ID(1000001);
+                                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                                 geocomInterfaceOut.saveEx();
                             }
                         }
@@ -448,7 +457,8 @@ public class ValidatorGeocom implements ModelValidator {
                                     geocomInterfaceOut.setSeqNo(10);
                                     geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
                                     geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                    geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                                    geocomInterfaceOut.setAD_Org_ID(1000001);
+                                    geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                                     geocomInterfaceOut.saveEx();
                                 }
                             }
@@ -487,7 +497,8 @@ public class ValidatorGeocom implements ModelValidator {
                             geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
                             geocomInterfaceOut.setSeqNo(20);
                             geocomInterfaceOut.setRecord_ID(model.get_ID());
-                            geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                            geocomInterfaceOut.setAD_Org_ID(1000001);
+                            geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
                             geocomInterfaceOut.saveEx();
                         }
                     }

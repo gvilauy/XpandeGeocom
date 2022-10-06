@@ -106,7 +106,7 @@ public class ReadCreditSales extends SvrProcess {
                         " (select z_mediopago_id from z_mediopagopos where codmediopagopos='" + codMediPagoAux + "' and z_posvendor_id = 1000000) ";
                 int mProductIDAux = DB.getSQLValueEx(get_TrxName(), sql);
                 if (mProductIDAux <= 0){
-                    return;
+                    throw new AdempiereException("No se obtuvo producto para el medio de pago pos: " + codMediPagoAux);
                 }
                 MProduct product = new MProduct(getCtx(), mProductIDAux, get_TrxName());
                 if ((product == null) || (product.get_ID() <= 0)){
