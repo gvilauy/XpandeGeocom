@@ -3,9 +3,13 @@ package org.xpande.geocom.model;
 import org.compiere.model.*;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.TimeUtil;
+import org.xpande.comercial.model.MZProdSalesOffer;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -312,8 +316,23 @@ public class ValidatorGeocom implements ModelValidator {
                 return null;
             }
 
+            // Si tengo oferta de venta vigente para este producto y organización me aseguro de setear este precio de oferta
+            // De esta manera la marca se crea pero el precio es el de oferta
+            BigDecimal salesOfferPrice = null;
+            Timestamp today = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
+            String sql = " select max(z_prodsalesoffer_id) as z_prodsalesoffer_id " +
+                    " from z_prodsalesoffer " +
+                    " where ad_org_id =" + priceList.getAD_Org_ID() +
+                    " and m_product_id =" + product.get_ID() +
+                    " and enddate >= '" + today + "' ";
+            int offerID = DB.getSQLValueEx(model.get_TrxName(), sql);
+            if (offerID > 0) {
+                MZProdSalesOffer prodSalesOffer = new MZProdSalesOffer(model.getCtx(), offerID, null);
+                salesOfferPrice = prodSalesOffer.getPrice();
+            }
+
             // Debo verificar que la organizacion asociada a esta lista de precios, trabaje con el POS de Geocom, sino es asi no hago nada
-            String sql = " select count(a.*) from z_posvendororg a " +
+            sql = " select count(a.*) from z_posvendororg a " +
                     " inner join z_posvendor b on a.z_posvendor_id = b.z_posvendor_id and b.value='GEOCOM' " +
                     " where ad_orgtrx_id =" + priceList.getAD_Org_ID();
             int contador = DB.getSQLValueEx(null, sql);
@@ -328,6 +347,12 @@ public class ValidatorGeocom implements ModelValidator {
                 // Proceso segun marca que ya tenía este producto antes de su actualización.
                 // Si marca anterior es CREATE
                 if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
+                    // Si tengo precio de venta de oferta se lo seteo a esta marca
+                    if (salesOfferPrice != null) {
+                        geocomInterfaceOut.setPriceSO(salesOfferPrice);
+                        geocomInterfaceOut.setWithOfferSO(true);
+                        geocomInterfaceOut.saveEx();
+                    }
                     // No hago nada y respeto primer marca
                     return null;
                 }
@@ -355,6 +380,11 @@ public class ValidatorGeocom implements ModelValidator {
 
             geocomInterfaceOut.setIsPriceChanged(true);
             geocomInterfaceOut.setM_PriceList_ID(priceList.get_ID());
+            // Si tengo precio de venta de oferta se lo seteo a esta marca
+            if (salesOfferPrice != null) {
+                geocomInterfaceOut.setPriceSO(salesOfferPrice);
+                geocomInterfaceOut.setWithOfferSO(true);
+            }
             geocomInterfaceOut.saveEx();
         }
         return null;

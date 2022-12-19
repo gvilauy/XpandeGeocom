@@ -80,7 +80,7 @@ public class ReadCreditSales extends SvrProcess {
                     " a.iso_code, a.codcaja, a.codcajero, sum(b.totalamt) as totalamt " +
                     " from z_gc_interfacevta a " +
                     " inner join z_gc_interfacevtapago b on a.z_gc_interfacevta_id = b.z_gc_interfacevta_id " +
-                    " inner join z_mediopagopos mpos on (b.codmediopago = mpos.codmediopagopos and mpos.z_posvendor_id = 1000000) " +
+                    " inner join z_mediopagopos mpos on (b.codmediopago = mpos.codmediopagopos and mpos.z_posvendor_id = 1000002) " +
                     " inner join z_mediopago mp on mp.z_mediopago_id = mpos.z_mediopago_id " +
                     " where a.ad_org_id =" + this.adOrgID +
                     " and a.fechaticket between '" + this.dateTrx + "' and '" + dateTo2 + "' " +
@@ -95,7 +95,7 @@ public class ReadCreditSales extends SvrProcess {
 
                 // Obtengo medio de pago pos
                 sql = " select max(a.codmediopago) as codmediopago from z_gc_interfacevtapago a " +
-                        " inner join z_mediopagopos mpos on (a.codmediopago = mpos.codmediopagopos and mpos.z_posvendor_id = 1000000) " +
+                        " inner join z_mediopagopos mpos on (a.codmediopago = mpos.codmediopagopos and mpos.z_posvendor_id = 1000002) " +
                         " inner join z_mediopago mp on mp.z_mediopago_id = mpos.z_mediopago_id " +
                         " where z_gc_interfacevta_id =" + rs.getInt("z_gc_interfacevta_id") +
                         " and mp.isventacredito ='Y' ";
@@ -103,7 +103,7 @@ public class ReadCreditSales extends SvrProcess {
 
                 // Obtengo producto asociado al medio de pago
                 sql = " select max(m_product_id) as m_product_id from Z_MedioPago_Acct where z_mediopago_id in " +
-                        " (select z_mediopago_id from z_mediopagopos where codmediopagopos='" + codMediPagoAux + "' and z_posvendor_id = 1000000) ";
+                        " (select z_mediopago_id from z_mediopagopos where codmediopagopos='" + codMediPagoAux + "' and z_posvendor_id = 1000002) ";
                 int mProductIDAux = DB.getSQLValueEx(get_TrxName(), sql);
                 if (mProductIDAux <= 0){
                     throw new AdempiereException("No se obtuvo producto para el medio de pago pos: " + codMediPagoAux);
