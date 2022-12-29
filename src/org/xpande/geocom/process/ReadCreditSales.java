@@ -29,6 +29,8 @@ public class ReadCreditSales extends SvrProcess {
 
     private int adOrgID = 0;
     private Timestamp dateTrx = null;
+    private boolean isDeleteOld = true;
+    private int counter = 0;
     private MZGeocomConfig geocomConfig = null;
 
     @Override
@@ -47,6 +49,9 @@ public class ReadCreditSales extends SvrProcess {
                     else if (name.trim().equalsIgnoreCase("DateTrx")){
                         this.dateTrx = (Timestamp)para[i].getParameter();
                     }
+                    else if (name.trim().equalsIgnoreCase("DeleteOld")) {
+                        this.isDeleteOld = (((String) para[i].getParameter()).trim().equalsIgnoreCase("Y")) ? true : false;
+                    }
                 }
             }
         }
@@ -55,16 +60,93 @@ public class ReadCreditSales extends SvrProcess {
     @Override
     protected String doIt() throws Exception {
         this.geocomConfig = MZGeocomConfig.getDefault(getCtx(), null);
-        this.setVentasCredito();
-        this.setVentasComprobantes();
-        return "OK";
+
+        // Elimino información previamente generada para esta fecha y organización
+        String message = this.deleteData();
+        if (message != null) {
+            return "@Error@ " + message;
+        }
+        // Cargo Ventas a Crédito
+        message = this.setVentasCredito();
+        if (message != null) {
+            return "@Error@ " + message;
+        }
+        // Cargo ventas para ser informadas en formularios de DGI (2/181)
+        message = this.setVentasComprobantes();
+        if (message != null) {
+            return "@Error@ " + message;
+        }
+        return "OK. Cantidad de Ventas Crédito procesadas: " + this.counter;
+    }
+
+    /**
+     * Elimina información previamente generada para esta fecha y organización
+     * Tanane. Created by Gabriel Vila on 2022-08-17
+     * @return
+     */
+    private String deleteData() {
+
+        String sql, action;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            // Elimino ventas a crédito si así lo indica el usuario
+            if (this.isDeleteOld) {
+                // Obtengo primero invoices generadas y asociadas con ventas a credito
+                sql = " select c_invoice_id from Z_GC_VtaCtaCte " +
+                        " where ad_org_id = " + this.adOrgID +
+                        " and datetrx ='" + this.dateTrx + "' ";
+
+                pstmt = DB.prepareStatement(sql, get_TrxName());
+                rs = pstmt.executeQuery();
+
+                while (rs.next()) {
+                    // Intento reactivar y luego eliminar esta invoice
+                    MInvoice invoice = new MInvoice(getCtx(), rs.getInt("c_invoice_id"), get_TrxName());
+                    if ((invoice != null) && (invoice.get_ID() > 0)) {
+                        if (!invoice.processIt(DocAction.ACTION_ReActivate)) {
+                            String message = invoice.getProcessMsg();
+                            if ((message == null) || (message.trim().equalsIgnoreCase(""))) {
+                                message = "No se pudo reactivar el comprobante de venta numero: " + invoice.getDocumentNo();
+                            }
+                            return message;
+                        }
+                        invoice.saveEx();
+                        invoice.deleteEx(true);
+                    }
+                }
+                // Actualizo tickets como no procesados
+                action = " update z_gc_interfacevta set iscreditreaded ='N' " +
+                        " where z_gc_interfacevta_id in " +
+                        " (select z_gc_interfacevta_id from Z_GC_VtaCtaCte " +
+                        " where ad_org_id = " + this.adOrgID +
+                        " and datetrx ='" + this.dateTrx + "') ";
+                DB.executeUpdateEx(action, get_TrxName());
+
+                // Elimino ahora si las ventas a credito
+                action = " delete from Z_GC_VtaCtaCte " +
+                        " where ad_org_id = " + this.adOrgID +
+                        " and datetrx ='" + this.dateTrx + "' ";
+                DB.executeUpdateEx(action, get_TrxName());
+            }
+        }
+        catch (Exception e) {
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null;
+            pstmt = null;
+        }
+        return null;
     }
 
     /***
      * Obtengo ventas por credito de la casa desde POS y genero los documentos correspondientes en ADempiere.
      * Xpande. Created by Gabriel Vila on 4/30/20.
      */
-    private void setVentasCredito() {
+    private String setVentasCredito() {
 
         String sql = "";
         PreparedStatement pstmt = null;
@@ -106,21 +188,21 @@ public class ReadCreditSales extends SvrProcess {
                         " (select z_mediopago_id from z_mediopagopos where codmediopagopos='" + codMediPagoAux + "' and z_posvendor_id = 1000002) ";
                 int mProductIDAux = DB.getSQLValueEx(get_TrxName(), sql);
                 if (mProductIDAux <= 0){
-                    throw new AdempiereException("No se obtuvo producto para el medio de pago pos: " + codMediPagoAux);
+                    return "No se obtuvo producto para el medio de pago pos: " + codMediPagoAux;
                 }
                 MProduct product = new MProduct(getCtx(), mProductIDAux, get_TrxName());
                 if ((product == null) || (product.get_ID() <= 0)){
-                    return;
+                    return null;
                 }
                 // Impuesto asociado al producto
                 MTaxCategory taxCategory = (MTaxCategory) product.getC_TaxCategory();
                 if ((taxCategory == null) || (taxCategory.get_ID() <= 0)){
-                    return;
+                    return null;
                 }
                 // Obtengo impuesto asociado al producto para este tipo de documentos
                 MTax taxProduct = taxCategory.getDefaultTax();
                 if ((taxProduct == null) || (taxProduct.get_ID() <= 0)){
-                    return;
+                    return null;
                 }
 
                 int cCurrencyID = 142;
@@ -329,6 +411,7 @@ public class ReadCreditSales extends SvrProcess {
             DB.close(rs, pstmt);
             rs = null; pstmt = null;
         }
+        return null;
     }
 
     /***
@@ -337,7 +420,7 @@ public class ReadCreditSales extends SvrProcess {
      * la generación de formularios para DGI (Ej: 2/181)
      * Xpande. Created by Gabriel Vila on 7/10/20.
      */
-    private void setVentasComprobantes() {
+    private String setVentasComprobantes() {
 
         String sql = "";
         PreparedStatement pstmt = null;
@@ -474,5 +557,6 @@ public class ReadCreditSales extends SvrProcess {
             DB.close(rs, pstmt);
             rs = null; pstmt = null;
         }
+        return null;
     }
 }
