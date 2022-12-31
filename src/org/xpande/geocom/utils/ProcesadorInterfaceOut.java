@@ -5,6 +5,7 @@ import org.compiere.model.*;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
+import org.xpande.comercial.model.MZProdSalesOffer;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
 import org.xpande.core.utils.FileUtils;
@@ -136,6 +137,20 @@ public class ProcesadorInterfaceOut {
                     MProductPrice productPrice = MProductPrice.get(ctx, plVersion.get_ID(), interfaceOut.getRecord_ID(), null);
                     if (productPrice != null){
                         priceSO = productPrice.getPriceStd();
+                    }
+                    // Si tengo oferta de venta vigente para este producto y organización me aseguro de setear este precio de oferta
+                    // De esta manera la marca se crea pero el precio es el de oferta
+                    BigDecimal salesOfferPrice = null;
+                    Timestamp today = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
+                    String sql = " select max(z_prodsalesoffer_id) as z_prodsalesoffer_id " +
+                            " from z_prodsalesoffer " +
+                            " where ad_org_id =" + priceList.getAD_Org_ID() +
+                            " and m_product_id =" + product.get_ID() +
+                            " and enddate >= '" + today + "' ";
+                    int offerID = DB.getSQLValueEx(trxName, sql);
+                    if (offerID > 0) {
+                        MZProdSalesOffer prodSalesOffer = new MZProdSalesOffer(ctx, offerID, null);
+                        priceSO = prodSalesOffer.getPrice();
                     }
                 }
                 gcOut.setPrice(priceSO);

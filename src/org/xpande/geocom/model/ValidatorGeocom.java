@@ -297,8 +297,11 @@ public class ValidatorGeocom implements ModelValidator {
 
             // Si no cambió el precio de lista no hago nada (puede que solo haya cambiado la fecha de vigencia)
             if (!model.is_ValueChanged(MProductPrice.COLUMNNAME_PriceList)){
-                return null;
+                if ((Env.getContext(model.getCtx(), "UpdatePrice") == null) || (Env.getContext(model.getCtx(), "UpdatePrice").equalsIgnoreCase("N"))){
+                    return null;
+                }
             }
+
             // Si el precio de lista es CERO no hago nada
             if ((model.getPriceList() == null) || (model.getPriceList().compareTo(Env.ZERO) <= 0)){
                 return null;
@@ -327,7 +330,7 @@ public class ValidatorGeocom implements ModelValidator {
                     " and enddate >= '" + today + "' ";
             int offerID = DB.getSQLValueEx(model.get_TrxName(), sql);
             if (offerID > 0) {
-                MZProdSalesOffer prodSalesOffer = new MZProdSalesOffer(model.getCtx(), offerID, null);
+                MZProdSalesOffer prodSalesOffer = new MZProdSalesOffer(model.getCtx(), offerID, model.get_TrxName());
                 salesOfferPrice = prodSalesOffer.getPrice();
             }
 
