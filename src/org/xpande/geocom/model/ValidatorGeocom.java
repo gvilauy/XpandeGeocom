@@ -72,15 +72,16 @@ public class ValidatorGeocom implements ModelValidator {
 
     /***
      * Validaciones para el modelo de Productos
-     * Xpande. Created by Gabriel Vila on 6/30/17.
      * @param model
+     * Xpande. Created by Gabriel Vila on 6/30/17.
      * @param type
      * @return
      * @throws Exception
      */
     public String modelChange(MProduct model, int type) throws Exception {
 
-        int adOrgID = 1000001;
+        int adOrgID1 = 1000001;
+        int adOrgID2 = 1000008;
 
         // Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -92,15 +93,22 @@ public class ValidatorGeocom implements ModelValidator {
                     return null;
                 }
 
-                // Marca de Creacion de Producto
-                MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
-                geocomInterfaceOut.setSeqNo(10);
-                geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
-                geocomInterfaceOut.setRecord_ID(model.get_ID());
-                geocomInterfaceOut.setAD_Org_ID(1000001);
-                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-                geocomInterfaceOut.saveEx();
+                for (int i = 1; i <= 2; i++) {
+                    int adOrgID = 0;
+                    if (i == 1) adOrgID = adOrgID1;
+                    if (i == 2) adOrgID = adOrgID2;
+
+                    // Marca de Creacion de Producto
+                    MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                    geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
+                    geocomInterfaceOut.setSeqNo(10);
+                    geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                    geocomInterfaceOut.setRecord_ID(model.get_ID());
+                    geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                    geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                    geocomInterfaceOut.saveEx();
+                }
+
             }
             else if (type == ModelValidator.TYPE_AFTER_CHANGE){
 
@@ -118,109 +126,126 @@ public class ValidatorGeocom implements ModelValidator {
 
                         // Si desactiva o marca producto como no vendible
                         if ((!model.isActive()) || (!model.isSold())){
-                            // Marca Delete para Geocom
-                            MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
-                            if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
-                                // Proceso segun marca que ya tenía este socio antes de su actualización.
-                                // Si marca anterior es CREATE
-                                if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
-                                    // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
-                                    geocomInterfaceOut.deleteEx(true);
-                                    return null;
-                                }
-                                else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
-                                    // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                    // No hago nada y respeto primer marca.
-                                    return null;                                }
-                            }
-                            // Si no tengo marca de delete, la creo ahora.
-                            if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
-                                geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE);
-                                geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
-                                geocomInterfaceOut.setSeqNo(10);
-                                geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                geocomInterfaceOut.setAD_Org_ID(1000001);
-                                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-                                geocomInterfaceOut.saveEx();
-                            }
-                        }
-                        else{
-                            // Si es producto esta activo y se vende
-                            if (model.isActive() && model.isSold()){
-                                // Doy de alta
+
+                            for (int i = 1; i <= 2; i++) {
+                                int adOrgID = 0;
+                                if (i == 1) adOrgID = adOrgID1;
+                                if (i == 2) adOrgID = adOrgID2;
+                                // Marca Delete para Geocom
                                 MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                                 if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
                                     // Proceso segun marca que ya tenía este socio antes de su actualización.
                                     // Si marca anterior es CREATE
                                     if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
-                                        // No hago nada
+                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
+                                        geocomInterfaceOut.deleteEx(true);
                                         return null;
                                     }
                                     else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
                                         // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
-                                        geocomInterfaceOut.deleteEx(true);
-                                        geocomInterfaceOut = null;
-                                    }
+                                        // No hago nada y respeto primer marca.
+                                        return null;                                }
                                 }
-                                // Si no tengo marca, la creo ahora.
+                                // Si no tengo marca de delete, la creo ahora.
                                 if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
                                     geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                    geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
-                                    geocomInterfaceOut.setSeqNo(10);
+                                    geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE);
                                     geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                                    geocomInterfaceOut.setSeqNo(10);
                                     geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                    geocomInterfaceOut.setAD_Org_ID(1000001);
-                                    geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
+                                    geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                                    geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
                                     geocomInterfaceOut.saveEx();
                                 }
                             }
                         }
-                    }
-                    // Marca Update
-                    MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
-                    if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
-                        // Proceso segun marca que ya tenía este producto antes de su actualización.
-                        // Si marca anterior es CREATE
-                        if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
-                            // No hago nada y respeto primer marca
-                            return null;
+                        else{
+                            // Si es producto esta activo y se vende
+                            if (model.isActive() && model.isSold()){
+
+                                for (int i = 1; i <= 2; i++) {
+                                    int adOrgID = 0;
+                                    if (i == 1) adOrgID = adOrgID1;
+                                    if (i == 2) adOrgID = adOrgID2;
+                                    // Doy de alta
+                                    MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
+                                    if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
+                                        // Proceso segun marca que ya tenía este socio antes de su actualización.
+                                        // Si marca anterior es CREATE
+                                        if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
+                                            // No hago nada
+                                            return null;
+                                        }
+                                        else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
+                                            // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
+                                            // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
+                                            geocomInterfaceOut.deleteEx(true);
+                                            geocomInterfaceOut = null;
+                                        }
+                                    }
+                                    // Si no tengo marca, la creo ahora.
+                                    if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
+                                        geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                                        geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
+                                        geocomInterfaceOut.setSeqNo(10);
+                                        geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                                        geocomInterfaceOut.setRecord_ID(model.get_ID());
+                                        geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                                        geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                                        geocomInterfaceOut.saveEx();
+                                    }
+                                }
+                            }
                         }
-                        else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
-                            // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
-                            // Si este producto sigue estando inactivo
-                            if (!model.isActive()){
-                                // No hago nada y respeto primer marca.
+                    }
+                    for (int i = 1; i <= 2; i++) {
+                        int adOrgID = 0;
+                        if (i == 1) adOrgID = adOrgID1;
+                        if (i == 2) adOrgID = adOrgID2;
+                        // Marca Update
+                        MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
+                        if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
+                            // Proceso segun marca que ya tenía este producto antes de su actualización.
+                            // Si marca anterior es CREATE
+                            if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
+                                // No hago nada y respeto primer marca
                                 return null;
                             }
-                        }
-                    }
-
-                    // Si no tengo marca de update, la creo ahora.
-                    if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
-                        // No existe aun marca de UPDATE sobre este producto, la creo ahora.
-                        geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                        geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_UPDATE);
-                        geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
-                        geocomInterfaceOut.setSeqNo(20);
-                        geocomInterfaceOut.setRecord_ID(model.get_ID());
-                        geocomInterfaceOut.setIsPriceChanged(false);
-                        geocomInterfaceOut.setAD_Org_ID(1000001);
-                        geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-                        geocomInterfaceOut.saveEx();
-                    }
-
-                    // Marca de update para Tandem si cambio
-                    if (model.is_ValueChanged("M_Product_Tandem_ID")){
-                        geocomInterfaceOut.setIsTandemChanged(true);
-                        // Guardo tandem anterior en caso de haber cambio
-                        if (model.get_ValueOldAsInt("M_Product_Tandem_ID") > 0){
-                            if (geocomInterfaceOut.getM_Product_Tandem_ID() <= 0){
-                                geocomInterfaceOut.setM_Product_Tandem_ID(model.get_ValueOldAsInt("M_Product_Tandem_ID"));
+                            else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
+                                // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
+                                // Si este producto sigue estando inactivo
+                                if (!model.isActive()){
+                                    // No hago nada y respeto primer marca.
+                                    return null;
+                                }
                             }
                         }
-                        geocomInterfaceOut.saveEx();
+
+                        // Si no tengo marca de update, la creo ahora.
+                        if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
+                            // No existe aun marca de UPDATE sobre este producto, la creo ahora.
+                            geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                            geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_UPDATE);
+                            geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                            geocomInterfaceOut.setSeqNo(20);
+                            geocomInterfaceOut.setRecord_ID(model.get_ID());
+                            geocomInterfaceOut.setIsPriceChanged(false);
+                            geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                            geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                            geocomInterfaceOut.saveEx();
+                        }
+
+                        // Marca de update para Tandem si cambio
+                        if (model.is_ValueChanged("M_Product_Tandem_ID")){
+                            geocomInterfaceOut.setIsTandemChanged(true);
+                            // Guardo tandem anterior en caso de haber cambio
+                            if (model.get_ValueOldAsInt("M_Product_Tandem_ID") > 0){
+                                if (geocomInterfaceOut.getM_Product_Tandem_ID() <= 0){
+                                    geocomInterfaceOut.setM_Product_Tandem_ID(model.get_ValueOldAsInt("M_Product_Tandem_ID"));
+                                }
+                            }
+                            geocomInterfaceOut.saveEx();
+                        }
                     }
                 }
             }
@@ -240,7 +265,9 @@ public class ValidatorGeocom implements ModelValidator {
     public String modelChange(MZProductoUPC model, int type) throws Exception {
 
         MProduct product = (MProduct)model.getM_Product();
-        int adOrgID = 1000001;
+        int adOrgID1 = 1000001;
+        int adOrgID2 = 1000008;
+
 
         // Si el producto no se vende o no esta activo, no hago nada
         if ((!product.isSold()) || (!product.isActive())){
@@ -251,30 +278,40 @@ public class ValidatorGeocom implements ModelValidator {
         // Para Geocom, solo se crean la marcas para luego considerarse en la generación del archivo plano.
         if (type == ModelValidator.TYPE_AFTER_NEW){
 
-            // Marca Create
-            MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-            geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
-            geocomInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
-            geocomInterfaceOut.setRecord_ID(model.get_ID());
-            geocomInterfaceOut.setSeqNo(15);
-            geocomInterfaceOut.setAD_Org_ID(1000001);
-            geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-            geocomInterfaceOut.saveEx();
+            for (int i = 1; i <= 2; i++) {
+                int adOrgID = 0;
+                if (i == 1) adOrgID = adOrgID1;
+                if (i == 2) adOrgID = adOrgID2;
 
+                // Marca Create
+                MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
+                geocomInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
+                geocomInterfaceOut.setRecord_ID(model.get_ID());
+                geocomInterfaceOut.setSeqNo(15);
+                geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                geocomInterfaceOut.saveEx();
+            }
         }
         else if (type == ModelValidator.TYPE_AFTER_DELETE){
 
-            // Marca Update si tengo UPC
-            if (model.getUPC() != null){
-                MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE);
-                geocomInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
-                geocomInterfaceOut.setRecord_ID(model.get_ID());
-                geocomInterfaceOut.setDescription(model.getUPC().trim());
-                geocomInterfaceOut.setSeqNo(13);
-                geocomInterfaceOut.setAD_Org_ID(1000001);
-                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-                geocomInterfaceOut.saveEx();
+            for (int i = 1; i <= 2; i++) {
+                int adOrgID = 0;
+                if (i == 1) adOrgID = adOrgID1;
+                if (i == 2) adOrgID = adOrgID2;
+                // Marca Update si tengo UPC
+                if (model.getUPC() != null){
+                    MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                    geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE);
+                    geocomInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
+                    geocomInterfaceOut.setRecord_ID(model.get_ID());
+                    geocomInterfaceOut.setDescription(model.getUPC().trim());
+                    geocomInterfaceOut.setSeqNo(13);
+                    geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                    geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                    geocomInterfaceOut.saveEx();
+                }
             }
         }
         return null;
@@ -289,8 +326,6 @@ public class ValidatorGeocom implements ModelValidator {
      * @throws Exception
      */
     public String modelChange(MProductPrice model, int type) throws Exception {
-
-        int adOrgID = 1000001;
 
         // Retail. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -376,8 +411,8 @@ public class ValidatorGeocom implements ModelValidator {
                 geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_UPDATE);
                 geocomInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                 geocomInterfaceOut.setRecord_ID(product.get_ID());
-                geocomInterfaceOut.setAD_Org_ID(1000001);
-                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
+                geocomInterfaceOut.setAD_Org_ID(priceList.getAD_Org_ID());
+                geocomInterfaceOut.setAD_OrgTrx_ID(priceList.getAD_Org_ID());
                 geocomInterfaceOut.setSeqNo(30);
             }
 
@@ -403,7 +438,8 @@ public class ValidatorGeocom implements ModelValidator {
      */
     public String modelChange(MBPartner model, int type) throws Exception {
 
-        int adOrgID = 1000001;
+        int adOrgID1 = 1000001;
+        int adOrgID2 = 1000008;
 
         // Geocom. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -415,15 +451,20 @@ public class ValidatorGeocom implements ModelValidator {
                     return null;
                 }
 
-                // Marca de Creacion de Socio
-                MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
-                geocomInterfaceOut.setSeqNo(10);
-                geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
-                geocomInterfaceOut.setRecord_ID(model.get_ID());
-                geocomInterfaceOut.setAD_Org_ID(1000001);
-                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-                geocomInterfaceOut.saveEx();
+                for (int i = 1; i <= 2; i++) {
+                    int adOrgID = 0;
+                    if (i == 1) adOrgID = adOrgID1;
+                    if (i == 2) adOrgID = adOrgID2;
+                    // Marca de Creacion de Socio
+                    MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                    geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
+                    geocomInterfaceOut.setSeqNo(10);
+                    geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                    geocomInterfaceOut.setRecord_ID(model.get_ID());
+                    geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                    geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                    geocomInterfaceOut.saveEx();
+                }
             }
             else if (type == ModelValidator.TYPE_AFTER_CHANGE){
 
@@ -436,67 +477,76 @@ public class ValidatorGeocom implements ModelValidator {
 
                         // Si desactiva cliente, mando marca de delete
                         if ((!model.isActive()) || (!model.isCustomer())){
-                            // Marca Delete para Geocom
-                            MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
-                            if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
-                                // Proceso segun marca que ya tenía este socio antes de su actualización.
-                                // Si marca anterior es CREATE
-                                if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
-                                    // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
-                                    geocomInterfaceOut.deleteEx(true);
-                                    return null;
-                                }
-                                else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
-                                    // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                    // No hago nada y respeto primer marca.
-                                    return null;
-                                }
-                            }
-                            // Si no tengo marca de delete, la creo ahora.
-                            if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
-                                geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE);
-                                geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
-                                geocomInterfaceOut.setSeqNo(30);
-                                geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                geocomInterfaceOut.setAD_Org_ID(1000001);
-                                geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-                                geocomInterfaceOut.saveEx();
-                            }
-                        }
-                        else{
-                            // Si es cliente y esta activo
-                            if (model.isActive() && model.isCustomer()){
-                                // Doy de alta
+                            for (int i = 1; i <= 2; i++) {
+                                int adOrgID = 0;
+                                if (i == 1) adOrgID = adOrgID1;
+                                if (i == 2) adOrgID = adOrgID2;
+                                // Marca Delete para Geocom
                                 MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                                 if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
                                     // Proceso segun marca que ya tenía este socio antes de su actualización.
                                     // Si marca anterior es CREATE
                                     if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
-                                        // No hago nada
+                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
+                                        geocomInterfaceOut.deleteEx(true);
                                         return null;
                                     }
                                     else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
                                         // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
-                                        geocomInterfaceOut.deleteEx(true);
-                                        geocomInterfaceOut = null;
+                                        // No hago nada y respeto primer marca.
+                                        return null;
                                     }
                                 }
-                                // Si no tengo marca, la creo ahora.
+                                // Si no tengo marca de delete, la creo ahora.
                                 if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
                                     geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                    geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
-                                    geocomInterfaceOut.setSeqNo(10);
+                                    geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE);
                                     geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                                    geocomInterfaceOut.setSeqNo(30);
                                     geocomInterfaceOut.setRecord_ID(model.get_ID());
-                                    geocomInterfaceOut.setAD_Org_ID(1000001);
-                                    geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
+                                    geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                                    geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
                                     geocomInterfaceOut.saveEx();
                                 }
                             }
                         }
-
+                        else{
+                            // Si es cliente y esta activo
+                            if (model.isActive() && model.isCustomer()){
+                                for (int i = 1; i <= 2; i++) {
+                                    int adOrgID = 0;
+                                    if (i == 1) adOrgID = adOrgID1;
+                                    if (i == 2) adOrgID = adOrgID2;
+                                    // Doy de alta
+                                    MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
+                                    if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
+                                        // Proceso segun marca que ya tenía este socio antes de su actualización.
+                                        // Si marca anterior es CREATE
+                                        if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
+                                            // No hago nada
+                                            return null;
+                                        }
+                                        else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
+                                            // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
+                                            // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
+                                            geocomInterfaceOut.deleteEx(true);
+                                            geocomInterfaceOut = null;
+                                        }
+                                    }
+                                    // Si no tengo marca, la creo ahora.
+                                    if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
+                                        geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                                        geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
+                                        geocomInterfaceOut.setSeqNo(10);
+                                        geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                                        geocomInterfaceOut.setRecord_ID(model.get_ID());
+                                        geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                                        geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                                        geocomInterfaceOut.saveEx();
+                                    }
+                                }
+                            }
+                        }
                     }
                     else{
 
@@ -504,35 +554,39 @@ public class ValidatorGeocom implements ModelValidator {
                         if ((!model.isCustomer()) || (!model.isActive())){
                             return null;
                         }
-
-                        // Marca Update para Geocom
-                        MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
-                        if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
-                            // Proceso segun marca que ya tenía este producto antes de su actualización.
-                            // Si marca anterior es CREATE
-                            if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
-                                // No hago nada y respeto primer marca
-                                return null;
-                            }
-                            else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
-                                // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
-                                // Si este producto sigue estando inactivo
-                                if (!model.isActive()){
-                                    // No hago nada y respeto primer marca.
+                        for (int i = 1; i <= 2; i++) {
+                            int adOrgID = 0;
+                            if (i == 1) adOrgID = adOrgID1;
+                            if (i == 2) adOrgID = adOrgID2;
+                            // Marca Update para Geocom
+                            MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
+                            if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
+                                // Proceso segun marca que ya tenía este producto antes de su actualización.
+                                // Si marca anterior es CREATE
+                                if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE)){
+                                    // No hago nada y respeto primer marca
                                     return null;
                                 }
+                                else if (geocomInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_GeocomInterfaceOut.CRUDTYPE_DELETE)){
+                                    // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
+                                    // Si este producto sigue estando inactivo
+                                    if (!model.isActive()){
+                                        // No hago nada y respeto primer marca.
+                                        return null;
+                                    }
+                                }
                             }
-                        }
-                        // Si no tengo marca de update, la creo ahora.
-                        if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
-                            geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                            geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_UPDATE);
-                            geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
-                            geocomInterfaceOut.setSeqNo(20);
-                            geocomInterfaceOut.setRecord_ID(model.get_ID());
-                            geocomInterfaceOut.setAD_Org_ID(1000001);
-                            geocomInterfaceOut.setAD_OrgTrx_ID(1000001);
-                            geocomInterfaceOut.saveEx();
+                            // Si no tengo marca de update, la creo ahora.
+                            if ((geocomInterfaceOut == null) || (geocomInterfaceOut.get_ID() <= 0)){
+                                geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                                geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_UPDATE);
+                                geocomInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                                geocomInterfaceOut.setSeqNo(20);
+                                geocomInterfaceOut.setRecord_ID(model.get_ID());
+                                geocomInterfaceOut.setAD_Org_ID(adOrgID);
+                                geocomInterfaceOut.setAD_OrgTrx_ID(adOrgID);
+                                geocomInterfaceOut.saveEx();
+                            }
                         }
                     }
                 }

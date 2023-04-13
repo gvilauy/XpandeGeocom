@@ -239,7 +239,7 @@ public class ProcesadorInterfaceOut {
 
         String whereClause = X_Z_GeocomInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
                 " AND " + X_Z_GeocomInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_M_Product.Table_ID +
-                " AND " + X_Z_GeocomInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
+                " AND " + X_Z_GeocomInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + "=" + adOrgID;
 
         Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
 
