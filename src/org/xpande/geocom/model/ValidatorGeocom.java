@@ -82,6 +82,7 @@ public class ValidatorGeocom implements ModelValidator {
 
         int adOrgID1 = 1000001;
         int adOrgID2 = 1000008;
+        int adOrgID3 = 1000010;
 
         // Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -93,10 +94,11 @@ public class ValidatorGeocom implements ModelValidator {
                     return null;
                 }
 
-                for (int i = 1; i <= 2; i++) {
+                for (int i = 1; i <= 3; i++) {
                     int adOrgID = 0;
                     if (i == 1) adOrgID = adOrgID1;
                     if (i == 2) adOrgID = adOrgID2;
+                    if (i == 3) adOrgID = adOrgID3;
 
                     // Marca de Creacion de Producto
                     MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
@@ -267,6 +269,7 @@ public class ValidatorGeocom implements ModelValidator {
         MProduct product = (MProduct)model.getM_Product();
         int adOrgID1 = 1000001;
         int adOrgID2 = 1000008;
+        int adOrgID3 = 1000010;
 
 
         // Si el producto no se vende o no esta activo, no hago nada
@@ -278,10 +281,11 @@ public class ValidatorGeocom implements ModelValidator {
         // Para Geocom, solo se crean la marcas para luego considerarse en la generación del archivo plano.
         if (type == ModelValidator.TYPE_AFTER_NEW){
 
-            for (int i = 1; i <= 2; i++) {
+            for (int i = 1; i <= 3; i++) {
                 int adOrgID = 0;
                 if (i == 1) adOrgID = adOrgID1;
                 if (i == 2) adOrgID = adOrgID2;
+                if (i == 3) adOrgID = adOrgID3;
 
                 // Marca Create
                 MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
@@ -440,6 +444,7 @@ public class ValidatorGeocom implements ModelValidator {
 
         int adOrgID1 = 1000001;
         int adOrgID2 = 1000008;
+        int adOrgID3 = 1000010;
 
         // Geocom. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
@@ -451,10 +456,12 @@ public class ValidatorGeocom implements ModelValidator {
                     return null;
                 }
 
-                for (int i = 1; i <= 2; i++) {
+                for (int i = 1; i <= 3; i++) {
                     int adOrgID = 0;
                     if (i == 1) adOrgID = adOrgID1;
                     if (i == 2) adOrgID = adOrgID2;
+                    if (i == 3) adOrgID = adOrgID3;
+
                     // Marca de Creacion de Socio
                     MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
                     geocomInterfaceOut.setCRUDType(X_Z_GeocomInterfaceOut.CRUDTYPE_CREATE);
