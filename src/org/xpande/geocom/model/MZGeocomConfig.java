@@ -3,6 +3,7 @@ package org.xpande.geocom.model;
 import org.compiere.model.Query;
 
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -32,5 +33,4 @@ public class MZGeocomConfig extends X_Z_GeocomConfig{
 
         return model;
     }
-
 }

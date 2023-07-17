@@ -131,10 +131,13 @@ public class ValidatorGeocom implements ModelValidator {
                         // Si desactiva o marca producto como no vendible
                         if ((!model.isActive()) || (!model.isSold())){
 
-                            for (int i = 1; i <= 2; i++) {
+                            for (int i = 1; i <= 4; i++) {
                                 int adOrgID = 0;
                                 if (i == 1) adOrgID = adOrgID1;
                                 if (i == 2) adOrgID = adOrgID2;
+                                if (i == 3) adOrgID = adOrgID3;
+                                if (i == 4) adOrgID = adOrgID4;
+
                                 // Marca Delete para Geocom
                                 MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                                 if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
@@ -167,10 +170,13 @@ public class ValidatorGeocom implements ModelValidator {
                             // Si es producto esta activo y se vende
                             if (model.isActive() && model.isSold()){
 
-                                for (int i = 1; i <= 2; i++) {
+                                for (int i = 1; i <= 4; i++) {
                                     int adOrgID = 0;
                                     if (i == 1) adOrgID = adOrgID1;
                                     if (i == 2) adOrgID = adOrgID2;
+                                    if (i == 3) adOrgID = adOrgID3;
+                                    if (i == 4) adOrgID = adOrgID4;
+
                                     // Doy de alta
                                     MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                                     if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
@@ -202,10 +208,13 @@ public class ValidatorGeocom implements ModelValidator {
                             }
                         }
                     }
-                    for (int i = 1; i <= 2; i++) {
+                    for (int i = 1; i <= 4; i++) {
                         int adOrgID = 0;
                         if (i == 1) adOrgID = adOrgID1;
                         if (i == 2) adOrgID = adOrgID2;
+                        if (i == 3) adOrgID = adOrgID3;
+                        if (i == 4) adOrgID = adOrgID4;
+
                         // Marca Update
                         MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                         if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
@@ -304,10 +313,13 @@ public class ValidatorGeocom implements ModelValidator {
         }
         else if (type == ModelValidator.TYPE_AFTER_DELETE){
 
-            for (int i = 1; i <= 2; i++) {
+            for (int i = 1; i <= 4; i++) {
                 int adOrgID = 0;
                 if (i == 1) adOrgID = adOrgID1;
                 if (i == 2) adOrgID = adOrgID2;
+                if (i == 3) adOrgID = adOrgID3;
+                if (i == 4) adOrgID = adOrgID4;
+
                 // Marca Update si tengo UPC
                 if (model.getUPC() != null){
                     MZGeocomInterfaceOut geocomInterfaceOut = new MZGeocomInterfaceOut(model.getCtx(), 0, model.get_TrxName());
@@ -490,10 +502,13 @@ public class ValidatorGeocom implements ModelValidator {
 
                         // Si desactiva cliente, mando marca de delete
                         if ((!model.isActive()) || (!model.isCustomer())){
-                            for (int i = 1; i <= 2; i++) {
+                            for (int i = 1; i <= 4; i++) {
                                 int adOrgID = 0;
                                 if (i == 1) adOrgID = adOrgID1;
                                 if (i == 2) adOrgID = adOrgID2;
+                                if (i == 3) adOrgID = adOrgID3;
+                                if (i == 4) adOrgID = adOrgID4;
+
                                 // Marca Delete para Geocom
                                 MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                                 if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
@@ -526,10 +541,13 @@ public class ValidatorGeocom implements ModelValidator {
                         else{
                             // Si es cliente y esta activo
                             if (model.isActive() && model.isCustomer()){
-                                for (int i = 1; i <= 2; i++) {
+                                for (int i = 1; i <= 4; i++) {
                                     int adOrgID = 0;
                                     if (i == 1) adOrgID = adOrgID1;
                                     if (i == 2) adOrgID = adOrgID2;
+                                    if (i == 3) adOrgID = adOrgID3;
+                                    if (i == 4) adOrgID = adOrgID4;
+
                                     // Doy de alta
                                     MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                                     if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){
@@ -567,10 +585,13 @@ public class ValidatorGeocom implements ModelValidator {
                         if ((!model.isCustomer()) || (!model.isActive())){
                             return null;
                         }
-                        for (int i = 1; i <= 2; i++) {
+                        for (int i = 1; i <= 4; i++) {
                             int adOrgID = 0;
                             if (i == 1) adOrgID = adOrgID1;
                             if (i == 2) adOrgID = adOrgID2;
+                            if (i == 3) adOrgID = adOrgID3;
+                            if (i == 4) adOrgID = adOrgID4;
+
                             // Marca Update para Geocom
                             MZGeocomInterfaceOut geocomInterfaceOut = MZGeocomInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), adOrgID, model.get_TrxName());
                             if ((geocomInterfaceOut != null) && (geocomInterfaceOut.get_ID() > 0)){

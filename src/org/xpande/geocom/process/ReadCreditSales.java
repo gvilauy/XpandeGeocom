@@ -59,6 +59,7 @@ public class ReadCreditSales extends SvrProcess {
 
     @Override
     protected String doIt() throws Exception {
+
         this.geocomConfig = MZGeocomConfig.getDefault(getCtx(), null);
 
         // Elimino información previamente generada para esta fecha y organización
